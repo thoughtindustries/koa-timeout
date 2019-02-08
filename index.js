@@ -1,24 +1,23 @@
-
 var co = require('co');
 
 module.exports = function(timeout) {
-  return function *(next) {
+  return function*(next) {
     var ctx = this;
     var tmr = null;
     yield Promise.race([
       new Promise(function(resolve, reject) {
         tmr = setTimeout(function() {
           var e = new Error('Request timeout');
-          e.status = 408;
+          e.status = 400;
           reject(e);
         }, timeout);
       }),
       new Promise(function(resolve, reject) {
         co(function*() {
-          yield *next;
+          yield* next;
         }).call(ctx, function(err) {
           clearTimeout(tmr);
-          if(err) reject(err);
+          if (err) reject(err);
           resolve();
         });
       })
